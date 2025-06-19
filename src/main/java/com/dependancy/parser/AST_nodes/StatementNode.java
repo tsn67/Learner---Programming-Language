@@ -5,10 +5,10 @@ import lombok.Setter;
 
 @Setter
 @Getter
-public abstract class ProgramNode {
+public abstract class StatementNode {
     private ProgramNodeType nodeType;
-    private ProgramNode leftChild;
-    private ProgramNode rightChild;
+    private StatementNode leftChild;
+    private StatementNode rightChild;
 
     public abstract String toString();
 }

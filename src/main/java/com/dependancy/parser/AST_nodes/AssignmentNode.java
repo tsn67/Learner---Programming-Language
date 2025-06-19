@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class AssignmentNode extends ProgramNode{
+public class AssignmentNode extends StatementNode {
 
     //assignment node left must be a identifier node (variable)
     private final String identifier;

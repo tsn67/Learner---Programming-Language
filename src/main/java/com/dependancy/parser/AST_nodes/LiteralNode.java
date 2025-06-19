@@ -1,24 +1,20 @@
 package com.dependancy.parser.AST_nodes;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Setter
 @Getter
-@NoArgsConstructor
-public class LiteralNode extends ProgramNode{
+public class LiteralNode extends StatementNode {
 
     private String value;
     public enum LiteralType{INT, STRING, BOOLEAN}
     private LiteralType type;
 
-    public LiteralNode(LiteralType type, String value){
+    public LiteralNode(){
         super.setNodeType(ProgramNodeType.LITERAL);
         super.setLeftChild(null);
         super.setRightChild(null);
-        this.type = type;
-        this.value = value;
     }
 
     public String toString(){

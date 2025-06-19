@@ -5,9 +5,13 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ExpressionNode extends ProgramNode{
+public class ExpressionNode extends StatementNode {
 
     private String operator = null; //should be added
+    private String identifier = null;
+    private String literalValue = null;
+    private LiteralNode.LiteralType literalType = null;
+    private boolean isSeperated = false; //seperated by (expression)
 
     public ExpressionNode(){
         super.setNodeType(ProgramNodeType.EXPRESSION);
@@ -15,15 +19,14 @@ public class ExpressionNode extends ProgramNode{
         super.setRightChild(null);
     }
 
-    public void addLeftChild(ProgramNode node) {
-        super.setLeftChild(node);
-    }
-
-    public void addRightChild(ProgramNode node) {
-        super.setRightChild(node);
-    }
 
     public String toString(){
-        return "Expression: "+"("+super.getLeftChild().toString()+")"+operator+"("+super.getRightChild().toString()+")";
+        if (this.identifier != null) {
+            return "identifier: "+this.identifier;
+        } else if (this.literalValue != null) {
+            return "literal: "+this.literalValue;
+        } else {
+            return "operator: "+this.operator;
+        }
     }
 }

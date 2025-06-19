@@ -9,5 +9,5 @@ import lombok.Setter;
 @Setter
 public class Token {
     private TokenType type;
-    private String value;
+    private String value = "";
 }

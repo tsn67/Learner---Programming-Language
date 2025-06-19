@@ -5,4 +5,5 @@ public enum ProgramNodeType {
     EXPRESSION,
     DECLARATION,
     ASSIGNMENT,
+    TERM
 }

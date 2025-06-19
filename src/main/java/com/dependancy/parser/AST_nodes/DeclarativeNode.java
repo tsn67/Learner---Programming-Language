@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class DeclarativeNode extends ProgramNode{
+public class DeclarativeNode extends StatementNode {
 
     private LiteralNode.LiteralType dataType;
     private String identifier;
@@ -35,6 +35,6 @@ public class DeclarativeNode extends ProgramNode{
 
     @Override
     public String toString() {
-        return "Type: "+this.dataType+" identifier: "+this.identifier+" value: "+super.getRightChild().toString();
+        return "Type: "+this.dataType+", identifier: "+this.identifier+", value: "+this.getRightChild().toString();
     }
 }
