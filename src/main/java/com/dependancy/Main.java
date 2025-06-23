@@ -1,75 +1,31 @@
 package com.dependancy;
 
+import com.dependancy.Parser.AstNodes.ProgramNode;
+import com.dependancy.Parser.SingleStatementParser;
 import com.dependancy.errors.InvalidSyntax;
 import com.dependancy.errors.InvalidToken;
 import com.dependancy.inputpreprocessor.PreLexer;
-import com.dependancy.parser.AST_nodes.StatementNode;
-import com.dependancy.parser.DeclarativeAssignmentParser;
 import com.dependancy.tokenizer.Lexer;
+import test.AstTester;
+import test.AstVisualizer;
 
-import java.util.ArrayList;
-import java.util.List;
 
 public class Main {
 
-    int count = 0;
-    List<StatementNode> nodes = new ArrayList<>();
-
-    private void helper(StatementNode node) {
-        count++;
-        if(node.getLeftChild() != null){
-            helper(node.getLeftChild());
-        }
-        if(node.getRightChild() != null){
-            helper(node.getRightChild());
-        }
-    }
-
-    private void traverse(StatementNode node){
-        this.nodes.add(node);
-        if (node.getLeftChild() != null){
-            traverse(node.getLeftChild());
-        }
-        if (node.getRightChild() != null){
-            traverse(node.getRightChild());
-        }
-    }
 
     public static void main(String[] args) {
 
-        var input1 = "int 2323";
-        var input2 = "a = 2 + a";
-        var input3 = "int b = 2 * 3 + a";
-
-        var inputProgram = "void main() {\n" +
-                "print(\"program started\")\n"+
-                "int temp = 0\n"+
-                "while(temp < 100){\n"+
-                "print(\"temp is: \" + temp)\n"+
-                "temp = temp + 1\n"+
-                "}\n"+
-                "print(\"program ended\")\n"+
-                "return\n"+
-                "}\n\n\n"+
-                "int add(int x, int y){\n"+
-                "return x + y\n"+
-                "}";
-
+        var inputProgram = "int sum = (2 * 10) / 100 + (10 - 3) * 2 * (20 * 40) + hello";
 
         PreLexer preLexer = new PreLexer();
 
-//        String[] inputs = inputProgram.split("\n");
-//        for(String s : inputs){
-//            preLexer.addLine(s);
-//        }
+        String[] inputs = inputProgram.split("\n");
+        for(String s : inputs){
+            preLexer.addLine(s);
+        }
 
-        preLexer.addLine(input1);
-        preLexer.addLine(input2);
-        preLexer.addLine(input3);
 
         Lexer lexer = new Lexer(preLexer);
-        DeclarativeAssignmentParser parser1 = new DeclarativeAssignmentParser();
-
 
 
         try {
@@ -80,20 +36,20 @@ public class Main {
                 });
             });
 
-            parser1.setLineTokens(output.getFirst().getTokens());
-            parser1.setLineNumber(1);
-            StatementNode testNode = parser1.parse();
+            System.out.println("\n\n\n====Parser====\n");
 
-            Main main = new Main();
-            main.helper(testNode);
-            System.out.println("Total number of nodes: " + main.count);
+            ProgramNode parserResultTreeRoot = new SingleStatementParser().parse(output.get(0).getTokens(), 1);
 
-            main.traverse(testNode);
+            AstTester tester = new AstTester();
+            tester.report(parserResultTreeRoot);
 
-            System.out.println("\n\n\n");
-            main.nodes.forEach(node -> {
-                System.out.println(node.toString());
-            });
+            System.out.println("\n\n\n====AST Visualizer====\n");
+            AstVisualizer astVisualizer = new AstVisualizer();
+            astVisualizer.exportToDotFile("ast.dot", parserResultTreeRoot);
+            //convert the ast.dot file to .png (image) using the command provided
+            // 'dot -Tpng ast.dot -o ast.png'
+            // install dot from 'graphnize'
+
 
         } catch (InvalidToken e) {
             System.out.println(e.getMessage());
