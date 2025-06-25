@@ -6,5 +6,5 @@ public enum AstNodeType {
     EXPRESSION,
     WHILE,
     IF,
-    ELSE
+    FUNCTION,
 }

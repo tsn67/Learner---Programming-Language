@@ -29,6 +29,7 @@ public class SingleStatementParser {
     public ProgramNode parse(List<Token> tokens, Integer lineNumber) {
         this.tokens = tokens;
         this.lineNumber = lineNumber;
+        this.index = 0;
 
         if (outOfTokens()) {
             throw new InvalidSyntax(this.lineNumber, "EOF", "Empty or invalid statement");
@@ -74,6 +75,7 @@ public class SingleStatementParser {
 
     private ProgramNode parseBinaryExpression(int minPrecedence) {
         ProgramNode left = parseTerm();
+
 
         while (!outOfTokens() && getCurrentToken().getType() == TokenType.OPERATOR) {
             String op = getCurrentToken().getValue();
@@ -147,6 +149,20 @@ public class SingleStatementParser {
 
     private ProgramNode parseAssignment() {
         AssignmentNode node = new AssignmentNode(lineNumber);
+
+        node.identifier = getCurrentToken().getValue();
+        index++;
+
+        if(outOfTokens() || !getCurrentToken().getValue().equals("=")) {
+            throw new InvalidSyntax(lineNumber, tokens.get(index-1).getValue(), "Expected '=' (assignment)");
+        }
+        index++;
+
+        node.right = parseExpression();
+
+        if(!outOfTokens()) {
+            throw new InvalidSyntax(lineNumber, tokens.get(index).getValue(), "Invalid assignment!");
+        }
         return node;
     }
 

@@ -1,9 +1,6 @@
 package test;
 
-import com.dependancy.Parser.AstNodes.AssignmentNode;
-import com.dependancy.Parser.AstNodes.DeclarationNode;
-import com.dependancy.Parser.AstNodes.ExpressionNode;
-import com.dependancy.Parser.AstNodes.ProgramNode;
+import com.dependancy.Parser.AstNodes.*;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -45,6 +42,20 @@ public class AstVisualizer {
         } else if (node instanceof DeclarationNode n) {
             if (n.right != null)
                 buildGraph(n.right, nodeId);
+        } else if (node instanceof AssignmentNode a) {
+            if (a.right != null) buildGraph(a.right, nodeId);
+        } else if (node instanceof WhileNode w) {
+            if (!w.body.isEmpty()) {
+                w.body.forEach(n -> buildGraph(n, nodeId));
+            }
+        } else if (node instanceof IfNode i) {
+            if (!i.body.isEmpty()) {
+                i.body.forEach(n -> buildGraph(n, nodeId));
+            }
+        } else if (node instanceof FunctionNode f) {
+            if (!f.body.isEmpty()) {
+                f.body.forEach(n -> buildGraph(n, nodeId));
+            }
         }
 
         return nodeId;
@@ -61,6 +72,17 @@ public class AstVisualizer {
             };
         } else if (node instanceof DeclarationNode s) {
             return s.toString();
+        } else if (node instanceof AssignmentNode a) {
+            return a.toString();
+        } else if (node instanceof WhileNode w) {
+            return w.toString();
+        } else if (node instanceof IfNode i) {
+            if (i.elseNode != null)
+                return i.toString() + "else: true";
+            else
+                return i.toString() + "else: false";
+        } else if (node instanceof FunctionNode f) {
+            return f.toString();
         }
         return "Unknown";
     }

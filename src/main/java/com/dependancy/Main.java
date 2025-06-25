@@ -1,7 +1,9 @@
 package com.dependancy;
 
+import com.dependancy.Parser.AstNodes.FunctionNode;
 import com.dependancy.Parser.AstNodes.ProgramNode;
-import com.dependancy.Parser.SingleStatementParser;
+import com.dependancy.Parser.FunctionBodyParser;
+import com.dependancy.Parser.MainParser;
 import com.dependancy.errors.InvalidSyntax;
 import com.dependancy.errors.InvalidToken;
 import com.dependancy.inputpreprocessor.PreLexer;
@@ -9,13 +11,31 @@ import com.dependancy.tokenizer.Lexer;
 import test.AstTester;
 import test.AstVisualizer;
 
+import java.util.List;
+
 
 public class Main {
 
 
     public static void main(String[] args) {
 
-        var inputProgram = "int sum = (2 * 10) / 100 + (10 - 3) * 2 * (20 * 40) + hello";
+        var inputProgram = "void main(int a, int b, bool c) {\n" +
+                "    int a = 10\n" +
+                "    int b = 20\n" +
+                "    int c = a + b\n" +
+                "    while ( 1 + 2 < 4) {\n" +
+                "        c = c + 1\n" +
+                "        temp = (tesmp * sdf) + 1 + (sdfsf * 2 )\n" +
+                "        c = c + 1\n" +
+                "    }\n" +
+                "    if (t < 4) {\n" +
+                "        c = c + 1\n" +
+                "    }\n" +
+                "    else {\n" +
+                "        d = d + 4\n" +
+                "    }\n" +
+                "    c = c + 1\n" +
+                "}\n";
 
         PreLexer preLexer = new PreLexer();
 
@@ -38,14 +58,17 @@ public class Main {
 
             System.out.println("\n\n\n====Parser====\n");
 
-            ProgramNode parserResultTreeRoot = new SingleStatementParser().parse(output.get(0).getTokens(), 1);
+            MainParser mainParser = new MainParser();
+            FunctionNode node = mainParser.parse(output);
+
+//            ProgramNode parserResultTreeRoot = new SingleStatementParser().parse(output.get(0).getTokens(), 1);
 
             AstTester tester = new AstTester();
-            tester.report(parserResultTreeRoot);
+            tester.report(node);
 
             System.out.println("\n\n\n====AST Visualizer====\n");
             AstVisualizer astVisualizer = new AstVisualizer();
-            astVisualizer.exportToDotFile("ast.dot", parserResultTreeRoot);
+            astVisualizer.exportToDotFile("ast.dot", node);
             //convert the ast.dot file to .png (image) using the command provided
             // 'dot -Tpng ast.dot -o ast.png'
             // install dot from 'graphnize'
