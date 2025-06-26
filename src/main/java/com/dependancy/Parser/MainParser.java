@@ -93,7 +93,6 @@ public class MainParser {
             throw new InvalidSyntax(2, "{", "'{' expected to start function body");
         }
 
-        // TODO: Parse function body in a separate parser
         List<LineToken> bodyTokens = input.subList(1, input.size()-1); // Assume rest is body
 
         if (input.getLast().getTokens().size() != 1 || !input.getLast().getTokens().getFirst().getValue().equals("}")) {
@@ -104,6 +103,7 @@ public class MainParser {
         List<ProgramNode> functionBody = functionBodyParser.parse(bodyTokens);
 
         FunctionNode node = new FunctionNode(1);
+        node.parameters = parameters;
         node.functionName = functionName;
         node.returnType = returnType;
         node.body = functionBody;

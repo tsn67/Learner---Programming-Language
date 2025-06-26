@@ -27,6 +27,7 @@ public class ConditionalStatementParser {
             if (tokenIndex < tokens.size()) {
                 return tokens.get(tokenIndex);
             }
+            lineNumber++;
             index++;
             tokenIndex = 0;
         }
@@ -41,6 +42,7 @@ public class ConditionalStatementParser {
                 break;
             }
             index++;
+            lineNumber++;
             tokenIndex = 0;
         }
     }
@@ -58,6 +60,7 @@ public class ConditionalStatementParser {
         } else {
             ProgramNode node = singleStatementParser.parse(input.get(index).getTokens(), lineNumber);
             index++;
+            lineNumber++;
             tokenIndex = 0;
             return node;
         }
@@ -87,13 +90,11 @@ public class ConditionalStatementParser {
 
         node.condition = (ExpressionNode) singleStatementParser.parse(conditionTokens, lineNumber);
 
-        // Expect '{' in new line
         if (getCurrentToken() == null || !getCurrentToken().getValue().equals("{")) {
             throw new InvalidSyntax(lineNumber, "while (condition) {", "Expected '{' after while condition");
         }
         advanceToNextToken();
 
-        // Parse body
         node.body = parseBody();
         return node;
     }
@@ -119,7 +120,11 @@ public class ConditionalStatementParser {
         }
         advanceToNextToken();
 
-        ifNode.condition = (ExpressionNode) singleStatementParser.parse(conditionTokens, lineNumber);
+        try {
+            ifNode.condition = (ExpressionNode) singleStatementParser.parse(conditionTokens, lineNumber);
+        } catch (ClassCastException e) {
+            throw new InvalidSyntax(lineNumber, "if ( condition )", "Condition must be an expression");
+        }
 
         // Expect '{'
         if (getCurrentToken() == null || !getCurrentToken().getValue().equals("{")) {
@@ -137,7 +142,6 @@ public class ConditionalStatementParser {
                 throw new InvalidSyntax(lineNumber, "else {", "Expected '{' after 'else'");
             }
             advanceToNextToken();
-
             IfNode elseNode = new IfNode(lineNumber);
             elseNode.body = parseBody();
             ifNode.elseNode = elseNode;

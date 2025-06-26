@@ -38,7 +38,7 @@ public class SingleStatementParser {
         String[] datatypes = { "string", "int", "bool" };
 
         if (Arrays.asList(datatypes).contains(getCurrentToken().getValue())) {
-            return parseDeclaration(); // implement later
+            return parseDeclaration();
         }
 
         try {
@@ -46,7 +46,7 @@ public class SingleStatementParser {
                     index + 1 < tokens.size() &&
                     tokens.get(index + 1).getType() == TokenType.OPERATOR &&
                     tokens.get(index + 1).getValue().equals("=")) {
-                return parseAssignment(); // implement later
+                return parseAssignment();
             }
         } catch (NullPointerException | IndexOutOfBoundsException e) {
             throw new InvalidSyntax(lineNumber, "EOF", "Unexpected end of input");
@@ -55,15 +55,17 @@ public class SingleStatementParser {
         return parseExpression();
     }
 
-
     private ProgramNode parseExpression() {
         return parseBinaryExpression(0);
     }
 
+    // Operator precedence from high to low
     private static final List<List<String>> OPERATOR_PRECEDENCE = List.of(
             List.of("*", "/", "%"),
             List.of("+", "-"),
-            List.of("==", "!=", "<", ">", "<=", ">=")
+            List.of("==", "!=", "<", ">", "<=", ">="),
+            List.of("and"),
+            List.of("or", "xor")
     );
 
     private int getPrecedence(String operator) {
@@ -76,11 +78,9 @@ public class SingleStatementParser {
     private ProgramNode parseBinaryExpression(int minPrecedence) {
         ProgramNode left = parseTerm();
 
-
         while (!outOfTokens() && getCurrentToken().getType() == TokenType.OPERATOR) {
             String op = getCurrentToken().getValue();
             int precedence = getPrecedence(op);
-
             if (precedence < minPrecedence) break;
 
             index++; // consume operator
@@ -102,6 +102,17 @@ public class SingleStatementParser {
     private ProgramNode parseTerm() {
         Token token = getCurrentToken();
         if (token == null) throw new InvalidSyntax(lineNumber, "EOF", "Unexpected end of input");
+
+        // Handle unary 'not'
+        if (token.getType() == TokenType.OPERATOR && token.getValue().equals("not")) {
+            index++; // consume 'not'
+            ExpressionNode node = new ExpressionNode(lineNumber);
+            node.expressionType = ExpressionNode.ExpressionType.OPERATOR;
+            node.operatorValue = "not";
+            node.left = parseTerm(); // only left used in unary
+            node.right = null;
+            return node;
+        }
 
         ExpressionNode node = new ExpressionNode(lineNumber);
 
@@ -134,7 +145,7 @@ public class SingleStatementParser {
                         throw new InvalidSyntax(lineNumber, token.getValue(), "Expected closing ')'");
                     }
                     index++; // consume ')'
-                    return node; // return just the expression inside => changed return the node
+                    return node;
                 } else {
                     throw new InvalidSyntax(lineNumber, token.getValue(), "Unexpected separator");
                 }
@@ -146,30 +157,26 @@ public class SingleStatementParser {
         return node;
     }
 
-
     private ProgramNode parseAssignment() {
         AssignmentNode node = new AssignmentNode(lineNumber);
 
         node.identifier = getCurrentToken().getValue();
         index++;
 
-        if(outOfTokens() || !getCurrentToken().getValue().equals("=")) {
-            throw new InvalidSyntax(lineNumber, tokens.get(index-1).getValue(), "Expected '=' (assignment)");
+        if (outOfTokens() || !getCurrentToken().getValue().equals("=")) {
+            throw new InvalidSyntax(lineNumber, tokens.get(index - 1).getValue(), "Expected '=' (assignment)");
         }
         index++;
 
         node.right = parseExpression();
 
-        if(!outOfTokens()) {
+        if (!outOfTokens()) {
             throw new InvalidSyntax(lineNumber, tokens.get(index).getValue(), "Invalid assignment!");
         }
         return node;
     }
 
     private ProgramNode parseDeclaration() {
-
-        //bool, string, int
-
         DeclarationNode node = new DeclarationNode(lineNumber);
 
         Map<String, DeclarationNode.DataType> dataTypes = new java.util.HashMap<>(Map.of("string", DeclarationNode.DataType.STRING));
@@ -179,14 +186,14 @@ public class SingleStatementParser {
         node.dataType = dataTypes.get(getCurrentToken().getValue());
 
         index++;
-        if(outOfTokens() || getCurrentToken().getType() != TokenType.IDENTIFIER){
-            throw new InvalidSyntax(lineNumber, tokens.get(index-1).getValue(), "Expected identifier (declaration)");
+        if (outOfTokens() || getCurrentToken().getType() != TokenType.IDENTIFIER) {
+            throw new InvalidSyntax(lineNumber, tokens.get(index - 1).getValue(), "Expected identifier (declaration)");
         }
         node.identifier = getCurrentToken().getValue();
         index++;
 
-        if(outOfTokens() || getCurrentToken().getType() != TokenType.OPERATOR || !getCurrentToken().getValue().equals("=")){
-            throw new InvalidSyntax(lineNumber, tokens.get(index-1).getValue(), "Expected '=' (declaration)");
+        if (outOfTokens() || getCurrentToken().getType() != TokenType.OPERATOR || !getCurrentToken().getValue().equals("=")) {
+            throw new InvalidSyntax(lineNumber, tokens.get(index - 1).getValue(), "Expected '=' (declaration)");
         }
         index++;
 

@@ -15,8 +15,12 @@ public class FunctionBodyParser {
         conditionalStatementParser.input = input;
         conditionalStatementParser.index = 0;
 
+        Integer lineNumber = 2;
+
         while (conditionalStatementParser.index < input.size()) {
+            conditionalStatementParser.lineNumber = lineNumber;
             ProgramNode stmt = conditionalStatementParser.parse();
+            lineNumber = conditionalStatementParser.lineNumber;
             functionBody.add(stmt);
         }
 

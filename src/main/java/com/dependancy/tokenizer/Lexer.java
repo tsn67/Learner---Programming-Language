@@ -7,7 +7,6 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
-
 @Setter
 public class Lexer {
 
@@ -17,9 +16,7 @@ public class Lexer {
     public Lexer(PreLexer preLexer) {
         this.preLexer = preLexer;
 
-        //order adding different type tokenizer is important
-        //provide least priority to the identifier tokenizer
-
+        // Order matters: lower-priority tokenizers (like IdentifierTokenizer) must come last
         this.tokenizers = new ArrayList<>();
         this.tokenizers.add(new KeywordTokenizer());
         this.tokenizers.add(new OperatorTokenizer());
@@ -28,24 +25,23 @@ public class Lexer {
         this.tokenizers.add(new IdentifierTokenizer());
     }
 
-
-    public List<LineToken> tokenize(){
-
+    public List<LineToken> tokenize() {
         var lines = preLexer.getInputLines();
         var outputLineTokens = new ArrayList<LineToken>();
 
         try {
-            lines.forEach(line -> {
-                line = line.trim(); //remove leading and trailing whitespaces
-                LineToken lineToken = new LineToken();
+            for (int i = 0; i < lines.size(); i++) {
+                String line = lines.get(i).trim(); // remove leading/trailing spaces
+                LineToken lineToken = new LineToken(); // ✅ set correct line number (starts from 1)
 
-                String[] possibleTokens = {line};
+                String[] possibleTokens = {line}; // allows for future splitting logic if needed
 
-                for(String token : possibleTokens){
+                for (String token : possibleTokens) {
                     String remaining = token;
-                    while(!remaining.isEmpty()){
+                    while (!remaining.isEmpty()) {
                         remaining = remaining.trim();
                         boolean found = false;
+
                         for (Tokenizer tokenizer : tokenizers) {
                             int matchPrefix = tokenizer.matchPrefix(remaining);
                             if (matchPrefix != -1) {
@@ -57,18 +53,19 @@ public class Lexer {
                             }
                         }
 
-                        if (!found){
-                            throw new InvalidToken(lines.indexOf(line) + 1, remaining);
+                        if (!found) {
+                            throw new InvalidToken(i + 1, remaining); // ✅ use correct line number
                         }
                     }
                 }
+
                 outputLineTokens.add(lineToken);
-            });
+            }
         } catch (InvalidToken e) {
             System.out.println("Invalid Token at line: " + e.getLineNumber());
             throw e;
         }
+
         return outputLineTokens;
     }
-
 }
